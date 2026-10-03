@@ -85,13 +85,14 @@ def add_student():
 
     try:
         sql = """
-        INSERT INTO students (student_id, student_name, course, year)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO students
+        (student_id, student_name, roll_number, course, year)
+        VALUES (%s, %s, %s, %s, %s)
         """
 
         cursor.execute(
             sql,
-            (student_id, student_name, course, year)
+            (student_id, student_name, student_id, course, year)
         )
 
         db.commit()
