@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance - Student Attendance System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        h1 {
+            color: #123f67;
+        }
+
+        select,
+        input {
+            display: block;
+            width: 320px;
+            padding: 12px;
+            margin: 10px auto;
+            border: 1px solid #aaa;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 12px 25px;
+            margin: 10px;
+            background-color: #0878b8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #065f91;
+        }
+
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 85%;
+        }
+
+        th,
+        td {
+            border: 1px solid #aaa;
+            padding: 12px;
+        }
+
+        th {
+            background-color: #e6f2fa;
+        }
+
+        .present {
+            background-color: green;
+            color: white;
+        }
+
+        .absent {
+            background-color: red;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Student Attendance System</h1>
+
+    <h2>Mark Attendance</h2>
+
+    <label>Student ID:</label>
+    <input type="text" id="studentId" placeholder="Enter Student ID">
+
+    <label>Student Name:</label>
+    <input type="text" id="studentName" placeholder="Enter Student Name">
+
+    <label>Subject:</label>
+    <input type="text" id="subject" placeholder="Enter Subject">
+
+    <label>Date:</label>
+    <input type="date" id="attendanceDate">
+
+    <label>Attendance:</label>
+
+    <select id="status">
+        <option value="">Select Attendance</option>
+        <option value="Present">Present</option>
+        <option value="Absent">Absent</option>
+    </select>
+
+    <button onclick="markAttendance()">Mark Attendance</button>
+
+    <h2>Attendance List</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>Student Name</th>
+                <th>Subject</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody id="attendanceTable">
+        </tbody>
+    </table>
+
+    <button onclick="goDashboard()">Back to Dashboard</button>
+
+    <script>
+
+       async function markAttendance() {
+
+    let studentId = document.getElementById("studentId").value.trim();
+    let studentName = document.getElementById("studentName").value.trim();
+    let subject = document.getElementById("subject").value.trim();
+    let date = document.getElementById("attendanceDate").value;
+    let status = document.getElementById("status").value;
+
+    if (
+        studentId === "" ||
+        studentName === "" ||
+        subject === "" ||
+        date === "" ||
+        status === ""
+    ) {
+        alert("Please enter all attendance details");
+        return;
+    }
+
+    try {
+
+        let response = await fetch(
+            "http://127.0.0.1:5000/mark_attendance",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    student_id: studentId,
+                    attendance_date: date,
+                    status: status
+                })
+            }
+        );
+
+        let result = await response.json();
+
+        if (response.ok) {
+
+            let table =
+                document.getElementById("attendanceTable");
+
+            let row = table.insertRow();
+
+            row.insertCell(0).innerHTML = studentId;
+            row.insertCell(1).innerHTML = studentName;
+            row.insertCell(2).innerHTML = subject;
+            row.insertCell(3).innerHTML = date;
+            row.insertCell(4).innerHTML = status;
+
+            if (status === "Present") {
+                row.cells[4].className = "present";
+            } else {
+                row.cells[4].className = "absent";
+            }
+
+            alert(result.message);
+
+            document.getElementById("studentId").value = "";
+            document.getElementById("studentName").value = "";
+            document.getElementById("subject").value = "";
+            document.getElementById("attendanceDate").value = "";
+            document.getElementById("status").value = "";
+
+        } else {
+
+            alert("Error: " + result.message);
+
+        }
+
+    } catch (error) {
+
+        console.log(error);
+        alert("Backend connection failed");
+
+    }
+} 
+
+        function goDashboard() {
+            window.location.href = "dashboard.html";
+        }
+
+    </script>
+
+</body>
+</html>

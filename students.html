@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Students - Student Attendance System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>Student Attendance System</h1>
+
+    <h2>Student Details</h2>
+
+    <div>
+        <label>Student ID:</label><br>
+        <input type="text" id="studentId" placeholder="Enter Student ID">
+        <br><br>
+
+        <label>Student Name:</label><br>
+        <input type="text" id="studentName" placeholder="Enter Student Name">
+        <br><br>
+
+        <label>Course:</label><br>
+        <input type="text" id="course" placeholder="Enter Course">
+        <br><br>
+
+        <label>Year:</label><br>
+        <input type="text" id="year" placeholder="Enter Year">
+        <br><br>
+
+        <button onclick="addStudent()">Add Student</button>
+    </div>
+
+    <h2>Student List</h2>
+
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Course</th>
+                <th>Year</th>
+            </tr>
+        </thead>
+
+        <tbody id="studentTable">
+        </tbody>
+    </table>
+
+    <br>
+
+    <button onclick="window.location.href='dashboard.html'">
+        Back to Dashboard
+    </button>
+
+    <script>
+async function addStudent() {
+
+    let studentId = document.getElementById("studentId").value.trim();
+    let studentName = document.getElementById("studentName").value.trim();
+    let course = document.getElementById("course").value.trim();
+    let year = document.getElementById("year").value.trim();
+
+    if (studentId === "" || studentName === "" || course === "" || year === "") {
+        alert("Please enter all student details");
+        return;
+    }
+
+    try {
+
+        let response = await fetch("http://127.0.0.1:5000/add_student", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                student_id: studentId,
+                student_name: studentName,
+                course: course,
+                year: year
+            })
+        });
+
+        let result = await response.json();
+
+        if (response.ok) {
+
+            alert(result.message);
+
+            document.getElementById("studentId").value = "";
+            document.getElementById("studentName").value = "";
+            document.getElementById("course").value = "";
+            document.getElementById("year").value = "";
+
+            loadStudents();
+
+        } else {
+
+            alert("Error: " + (result.message || "Unable to add student"));
+
+        }
+
+    } catch (error) {
+
+        console.log(error);
+        alert("Backend connection failed");
+
+    }
+}
+
+
+async function loadStudents() {
+
+    try {
+
+        let response = await fetch("http://127.0.0.1:5000/students");
+
+        let data = await response.json();
+
+        let table = document.getElementById("studentTable");
+
+        table.innerHTML = "";
+
+        data.forEach(function(student) {
+
+            let row = table.insertRow();
+
+            row.insertCell(0).innerHTML = student.student_id;
+            row.insertCell(1).innerHTML = student.student_name;
+            row.insertCell(2).innerHTML = student.course;
+            row.insertCell(3).innerHTML = student.year;
+
+        });
+
+    } catch (error) {
+
+        console.log("Unable to load students:", error);
+
+    }
+}
+
+
+loadStudents();
+
+
+
+</script>
+
+</body>
+</html>
