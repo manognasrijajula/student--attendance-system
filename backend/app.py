@@ -22,7 +22,7 @@ def home():
    return send_from_directory(os.path.join(os.path.dirname(__file__), ".."), "dashboard.html")
 @app.route("/students")
 def students():
-    db.cursor(cursor_factory=RealDictCursor)
+    cursor=db.cursor(cursor_factory=RealDictCursor)
     cursor.execute("SELECT * FROM students")
     data = cursor.fetchall()
     cursor.close()
@@ -30,7 +30,7 @@ def students():
 
 @app.route("/attendance")
 def attendance():
-    db.cursor(cursor_factory=RealDictCursor)
+    cursor=db.cursor(cursor_factory=RealDictCursor)
     cursor.execute("""
         SELECT 
             students.student_name,
@@ -96,7 +96,7 @@ def add_student():
     return jsonify({"message": "Student added successfully!"})
 @app.route("/reports")
 def reports():
-   db.cursor(cursor_factory=RealDictCursor)
+   cursor=db.cursor(cursor_factory=RealDictCursor)
    cursor.execute("""
         SELECT 
             students.student_id,
