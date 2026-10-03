@@ -97,7 +97,7 @@ def add_student():
 @app.route("/reports")
 def reports():
    db.cursor(cursor_factory=RealDictCursor)
-    cursor.execute("""
+   cursor.execute("""
         SELECT 
             students.student_id,
             students.student_name,
