@@ -96,8 +96,7 @@ async function addStudent() {
 
         } else {
 
-            alert("Error: " + (result.message || "Unable to add student"));
-
+            alert("Error: " + (result.error || result.message || "Unable to add student"));
         }
 
     } catch (error) {
