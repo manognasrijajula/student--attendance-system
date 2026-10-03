@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Faculty - Student Attendance System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        h1 {
+            color: #123f67;
+        }
+
+        input {
+            display: block;
+            width: 300px;
+            padding: 12px;
+            margin: 10px auto;
+            border: 1px solid #aaa;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 12px 25px;
+            margin: 10px;
+            background-color: #0878b8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #065f91;
+        }
+
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 70%;
+        }
+
+        th, td {
+            border: 1px solid #aaa;
+            padding: 12px;
+        }
+
+        th {
+            background-color: #e6f2fa;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Student Attendance System</h1>
+
+    <h2>Faculty Details</h2>
+
+    <label>Faculty ID:</label>
+    <input type="text" id="facultyId" placeholder="Enter Faculty ID">
+
+    <label>Faculty Name:</label>
+    <input type="text" id="facultyName" placeholder="Enter Faculty Name">
+
+    <label>Department:</label>
+    <input type="text" id="department" placeholder="Enter Department">
+
+    <label>Subject:</label>
+    <input type="text" id="subject" placeholder="Enter Subject">
+
+    <button onclick="addFaculty()">Add Faculty</button>
+
+    <h2>Faculty List</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Faculty ID</th>
+                <th>Faculty Name</th>
+                <th>Department</th>
+                <th>Subject</th>
+            </tr>
+        </thead>
+
+        <tbody id="facultyTable">
+        </tbody>
+    </table>
+
+    <button onclick="goDashboard()">Back to Dashboard</button>
+
+    <script>
+
+        function addFaculty() {
+
+            let id = document.getElementById("facultyId").value;
+            let name = document.getElementById("facultyName").value;
+            let department = document.getElementById("department").value;
+            let subject = document.getElementById("subject").value;
+
+            if (id === "" || name === "" || department === "" || subject === "") {
+                alert("Please enter all faculty details");
+                return;
+            }
+
+            let table = document.getElementById("facultyTable");
+
+            let row = table.insertRow();
+
+            row.insertCell(0).innerHTML = id;
+            row.insertCell(1).innerHTML = name;
+            row.insertCell(2).innerHTML = department;
+            row.insertCell(3).innerHTML = subject;
+
+            alert("Faculty added successfully!");
+
+            document.getElementById("facultyId").value = "";
+            document.getElementById("facultyName").value = "";
+            document.getElementById("department").value = "";
+            document.getElementById("subject").value = "";
+        }
+
+        function goDashboard() {
+            window.location.href = "dashboard.html";
+        }
+
+    </script>
+
+</body>
+</html>

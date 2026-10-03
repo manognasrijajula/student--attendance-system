@@ -1,18 +1,19 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import mysql.connector
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import os
 
 app = Flask(__name__)
 CORS(app)
 
-# MySQL connection
-db = mysql.connector.connect(
-    host="localhost",
-    port=3307,
-    user="root",
-    password=os.getenv("MYSQL_PASSWORD"),
-    database="student_attendance"
+db = psycopg2.connect(
+    host=os.getenv("DB_HOST"),
+    port=5432,
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    dbname="postgres",
+    sslmode="require"
 )
 
 
@@ -21,7 +22,7 @@ def home():
     return "Student Attendance System Backend is Running!"
 @app.route("/students")
 def students():
-    cursor = db.cursor(dictionary=True)
+    db.cursor(cursor_factory=RealDictCursor)
     cursor.execute("SELECT * FROM students")
     data = cursor.fetchall()
     cursor.close()
@@ -29,7 +30,7 @@ def students():
 
 @app.route("/attendance")
 def attendance():
-    cursor = db.cursor(dictionary=True)
+    db.cursor(cursor_factory=RealDictCursor)
     cursor.execute("""
         SELECT 
             students.student_name,
@@ -95,8 +96,7 @@ def add_student():
     return jsonify({"message": "Student added successfully!"})
 @app.route("/reports")
 def reports():
-    cursor = db.cursor(dictionary=True)
-
+   db.cursor(cursor_factory=RealDictCursor)
     cursor.execute("""
         SELECT 
             students.student_id,

@@ -1,0 +1,182 @@
+<!DOCTYPE html><html>
+<head>
+    <title>Reports - Student Attendance System</title><style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    h1 {
+        color: #123f67;
+    }
+
+    input {
+        display: block;
+        width: 300px;
+        padding: 12px;
+        margin: 10px auto;
+        border: 1px solid #aaa;
+        border-radius: 5px;
+    }
+
+    button {
+        padding: 12px 25px;
+        margin: 10px;
+        background-color: #0878b8;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #065f91;
+    }
+
+    table {
+        margin: 25px auto;
+        border-collapse: collapse;
+        width: 75%;
+    }
+
+    th, td {
+        border: 1px solid #aaa;
+        padding: 12px;
+    }
+
+    th {
+        background-color: #e6f2fa;
+    }
+
+    .percentage {
+        font-weight: bold;
+    }
+</style>
+
+</head><body><h1>Student Attendance System</h1>
+
+<h2>Attendance Report</h2>
+
+<label>Student ID:</label>
+
+<input
+    type="text"
+    id="studentId"
+    placeholder="Enter Student ID"
+>
+
+<button onclick="generateReport()">Generate Report</button>
+
+<h2>Report</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Student ID</th>
+            <th>Total Classes</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Attendance Percentage</th>
+        </tr>
+    </thead>
+
+    <tbody id="reportTable">
+    </tbody>
+</table>
+
+<button onclick="goDashboard()">Back to Dashboard</button>
+
+
+<script>
+
+    async function generateReport() {
+
+        let studentId =
+            document.getElementById("studentId").value.trim();
+
+        if (studentId === "") {
+            alert("Please enter Student ID");
+            return;
+        }
+
+        try {
+
+            let response =
+                await fetch("http://127.0.0.1:5000/reports");
+
+            let data = await response.json();
+
+            let student = data.find(function(item) {
+
+                return String(item.student_id) === String(studentId);
+
+            });
+
+            let table =
+                document.getElementById("reportTable");
+
+            table.innerHTML = "";
+
+            if (!student) {
+
+                alert("Student ID not found");
+                return;
+
+            }
+
+            let totalClasses =
+                Number(student.total_classes || 0);
+
+            let present =
+                Number(student.present || 0);
+
+            let absent =
+                Number(student.absent || (totalClasses - present));
+
+            let percentage = 0;
+
+            if (totalClasses > 0) {
+                percentage =
+                    (present / totalClasses) * 100;
+            }
+
+            let row = table.insertRow();
+
+            row.insertCell(0).innerHTML =
+                student.student_id;
+
+            row.insertCell(1).innerHTML =
+                totalClasses;
+
+            row.insertCell(2).innerHTML =
+                present;
+
+            row.insertCell(3).innerHTML =
+                absent;
+
+            row.insertCell(4).innerHTML =
+                percentage.toFixed(2) + "%";
+
+        }
+
+        catch (error) {
+
+            console.log(error);
+
+            alert("Unable to load report. Please check backend.");
+
+        }
+    }
+
+
+    function goDashboard() {
+
+        window.location.href = "dashboard.html";
+
+    }
+
+</script>
+
+</body>
+</html>
