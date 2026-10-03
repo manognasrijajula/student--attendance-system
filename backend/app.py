@@ -122,6 +122,12 @@ def reports():
    cursor.close()
 
    return jsonify(data)
+@app.route("/<path:filename>")
+def serve_files(filename):
+    return send_from_directory(
+        os.path.join(os.path.dirname(__file__), ".."),
+        filename
+    )
 if __name__ == "__main__":
     import os
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
