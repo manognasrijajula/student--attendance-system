@@ -83,17 +83,76 @@ def add_student():
 
     cursor = db.cursor()
 
-    sql = """
-    INSERT INTO students (student_id, student_name, course, year)
-    VALUES (%s, %s, %s, %s)
-    """
+    try:
+        sql = """
+        INSERT INTO students (student_id, student_name, course, year)
+        VALUES (%s, %s, %s, %s)
+        """
 
-    cursor.execute(sql, (student_id, student_name, course, year))
-    db.commit()
+        cursor.execute(
+            sql,
+            (student_id, student_name, course, year)
+        )
 
-    cursor.close()
+        db.commit()
 
-    return jsonify({"message": "Student added successfully!"})
+        return jsonify({
+            "message": "Student added successfully!"
+        })
+
+    except psycopg2.errors.UniqueViolation:
+        db.rollback()
+
+        return jsonify({
+            "error": "Student ID already exists"
+        }), 409
+
+    except Exception as e:
+        db.rollback()
+
+        return jsonify({
+            "error": str(e)
+        }), 500
+
+    finally:
+        cursor.close()
+@app.route("/reports")
+def reports():
+   cursor=db.cursor(cursor_factory=RealDictCursor)
+   cursor.execute("""
+        SELECT 
+            students.student_id,
+            students.student_name,
+            students.roll_number,
+            students.course,
+            students.year,
+            COUNT(attendance.student_id) AS total_classes,
+            SUM(CASE WHEN attendance.status = 'Present' THEN 1 ELSE 0 END) AS present,
+            SUM(CASE WHEN attendance.status = 'Absent' THEN 1 ELSE 0 END) AS absent
+        FROM students
+        LEFT JOIN attendance
+        ON students.student_id = attendance.student_id
+        GROUP BY 
+            students.student_id,
+            students.student_name,
+            students.roll_number,
+            students.course,
+            students.year
+    """)
+
+   data = cursor.fetchall()
+   cursor.close()
+
+   return jsonify(data)
+@app.route("/<path:filename>")
+def serve_files(filename):
+    return send_from_directory(
+        os.path.join(os.path.dirname(__file__), ".."),
+        filename
+    )
+if __name__ == "__main__":
+    import os
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 @app.route("/reports")
 def reports():
    cursor=db.cursor(cursor_factory=RealDictCursor)
