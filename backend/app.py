@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -19,7 +19,7 @@ db = psycopg2.connect(
 
 @app.route("/")
 def home():
-    return "Student Attendance System Backend is Running!"
+    return send_from_directory(os.path.join(os.path.dirname(__file__), ".."), "index.html")
 @app.route("/students")
 def students():
     db.cursor(cursor_factory=RealDictCursor)
