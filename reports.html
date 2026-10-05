@@ -101,10 +101,8 @@
         }
 
         try {
-
-            let response =
-                await fetch("http://127.0.0.1:5000/reports");
-
+            let response = await fetch("/reports");
+            
             let data = await response.json();
 
             let student = data.find(function(item) {
