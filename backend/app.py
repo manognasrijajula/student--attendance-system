@@ -72,6 +72,41 @@ def mark_attendance():
     return jsonify({
         "message": "Attendance marked successfully!"
     })
+@app.route("/mark_attendance", methods=["POST"])
+def mark_attendance():
+
+    data = request.json
+
+    subject = data["subject"]
+    attendance_date = data["attendance_date"]
+    attendance = data["attendance"]
+
+    cursor = db.cursor()
+
+    sql = """
+    INSERT INTO attendance
+    (student_id, attendance_date, status, subject)
+    VALUES (%s, %s, %s, %s)
+    """
+
+    values = []
+
+    for record in attendance:
+        values.append((
+            record["student_id"],
+            attendance_date,
+            record["status"],
+            subject
+        ))
+
+    cursor.executemany(sql, values)
+
+    db.commit()
+    cursor.close()
+
+    return jsonify({
+        "message": "Attendance marked successfully for all students!"
+    })
 @app.route("/add_student", methods=["POST"])
 def add_student():
     data = request.json
