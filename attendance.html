@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Attendance - Student Attendance System</title>
 
@@ -14,7 +15,6 @@
             color: #123f67;
         }
 
-        select,
         input {
             display: block;
             width: 320px;
@@ -26,7 +26,7 @@
 
         button {
             padding: 12px 25px;
-            margin: 10px;
+            margin: 15px;
             background-color: #0878b8;
             color: white;
             border: none;
@@ -39,7 +39,7 @@
         }
 
         table {
-            margin: 20px auto;
+            margin: 25px auto;
             border-collapse: collapse;
             width: 85%;
         }
@@ -55,13 +55,13 @@
         }
 
         .present {
-            background-color: green;
-            color: white;
+            color: green;
+            font-weight: bold;
         }
 
         .absent {
-            background-color: red;
-            color: white;
+            color: red;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -72,133 +72,248 @@
 
     <h2>Mark Attendance</h2>
 
-    <label>Student ID:</label>
-    <input type="text" id="studentId" placeholder="Enter Student ID">
-
-    <label>Student Name:</label>
-    <input type="text" id="studentName" placeholder="Enter Student Name">
-
     <label>Subject:</label>
-    <input type="text" id="subject" placeholder="Enter Subject">
+
+    <input
+        type="text"
+        id="subject"
+        placeholder="Enter Subject"
+    >
 
     <label>Date:</label>
-    <input type="date" id="attendanceDate">
 
-    <label>Attendance:</label>
+    <input
+        type="date"
+        id="attendanceDate"
+    >
 
-    <select id="status">
-        <option value="">Select Attendance</option>
-        <option value="Present">Present</option>
-        <option value="Absent">Absent</option>
-    </select>
-
-    <button onclick="markAttendance()">Mark Attendance</button>
-
-    <h2>Attendance List</h2>
+    <h2>Students</h2>
 
     <table>
+
         <thead>
             <tr>
                 <th>Student ID</th>
                 <th>Student Name</th>
-                <th>Subject</th>
-                <th>Date</th>
-                <th>Status</th>
+                <th>Roll Number</th>
+                <th>Attendance</th>
             </tr>
         </thead>
 
-        <tbody id="attendanceTable">
+        <tbody id="studentTable">
         </tbody>
+
     </table>
 
-    <button onclick="goDashboard()">Back to Dashboard</button>
+    <button onclick="markAllAttendance()">
+        Mark All Attendance
+    </button>
+
+    <br>
+
+    <button onclick="goDashboard()">
+        Back to Dashboard
+    </button>
+
 
     <script>
 
-       async function markAttendance() {
+        async function loadStudents() {
 
-    let studentId = document.getElementById("studentId").value.trim();
-    let studentName = document.getElementById("studentName").value.trim();
-    let subject = document.getElementById("subject").value.trim();
-    let date = document.getElementById("attendanceDate").value;
-    let status = document.getElementById("status").value;
+            try {
 
-    if (
-        studentId === "" ||
-        studentName === "" ||
-        subject === "" ||
-        date === "" ||
-        status === ""
-    ) {
-        alert("Please enter all attendance details");
-        return;
-    }
+                let response =
+                    await fetch("http://127.0.0.1:5000/students");
 
-    try {
-         let response = await fetch(
-    "/mark_attendance",
-       
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    student_id: studentId,
-                    attendance_date: date,
-                    status: status
-                })
+                let students = await response.json();
+
+                let table =
+                    document.getElementById("studentTable");
+
+                table.innerHTML = "";
+
+
+                students.forEach(function(student) {
+
+                    let row = table.insertRow();
+
+                    row.insertCell(0).innerHTML =
+                        student.student_id;
+
+                    row.insertCell(1).innerHTML =
+                        student.student_name;
+
+                    row.insertCell(2).innerHTML =
+                        student.roll_number || "-";
+
+
+                    row.insertCell(3).innerHTML = `
+
+                        <select
+                            class="attendanceStatus"
+                            data-student-id="${student.student_id}"
+                        >
+
+                            <option value="">
+                                Select
+                            </option>
+
+                            <option value="Present">
+                                Present
+                            </option>
+
+                            <option value="Absent">
+                                Absent
+                            </option>
+
+                        </select>
+
+                    `;
+
+                });
+
             }
-        );
 
-        let result = await response.json();
+            catch (error) {
 
-        if (response.ok) {
+                console.log(error);
 
-            let table =
-                document.getElementById("attendanceTable");
+                alert("Unable to load students");
 
-            let row = table.insertRow();
-
-            row.insertCell(0).innerHTML = studentId;
-            row.insertCell(1).innerHTML = studentName;
-            row.insertCell(2).innerHTML = subject;
-            row.insertCell(3).innerHTML = date;
-            row.insertCell(4).innerHTML = status;
-
-            if (status === "Present") {
-                row.cells[4].className = "present";
-            } else {
-                row.cells[4].className = "absent";
             }
-
-            alert(result.message);
-
-            document.getElementById("studentId").value = "";
-            document.getElementById("studentName").value = "";
-            document.getElementById("subject").value = "";
-            document.getElementById("attendanceDate").value = "";
-            document.getElementById("status").value = "";
-
-        } else {
-
-            alert("Error: " + result.message);
 
         }
 
-    } catch (error) {
 
-        console.log(error);
-        alert("Backend connection failed");
+        async function markAllAttendance() {
 
-    }
-} 
+            let subject =
+                document.getElementById("subject").value.trim();
+
+            let attendanceDate =
+                document.getElementById("attendanceDate").value;
+
+
+            if (subject === "" || attendanceDate === "") {
+
+                alert("Please enter Subject and Date");
+
+                return;
+
+            }
+
+
+            let statusElements =
+                document.querySelectorAll(".attendanceStatus");
+
+
+            let attendanceList = [];
+
+
+            for (let element of statusElements) {
+
+                let status = element.value;
+
+                let studentId =
+                    element.getAttribute("data-student-id");
+
+
+                if (status === "") {
+
+                    alert(
+                        "Please select attendance for all students"
+                    );
+
+                    return;
+
+                }
+
+
+                attendanceList.push({
+
+                    student_id: studentId,
+                    status: status
+
+                });
+
+            }
+
+
+            try {
+
+                let response = await fetch(
+                    "http://127.0.0.1:5000/mark_attendance",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            subject: subject,
+
+                            attendance_date: attendanceDate,
+
+                            attendance: attendanceList
+
+                        })
+
+                    }
+                );
+
+
+                let result = await response.json();
+
+
+                if (response.ok) {
+
+                    alert(result.message);
+
+                    document.getElementById("subject").value = "";
+
+                    document.getElementById(
+                        "attendanceDate"
+                    ).value = "";
+
+                    statusElements.forEach(function(element) {
+                        element.value = "";
+                    });
+
+                }
+
+                else {
+
+                    alert("Error: " + result.message);
+
+                }
+
+            }
+
+            catch (error) {
+
+                console.log(error);
+
+                alert("Backend connection failed");
+
+            }
+
+        }
+
 
         function goDashboard() {
+
             window.location.href = "dashboard.html";
+
         }
+
+
+        loadStudents();
 
     </script>
 
 </body>
+
 </html>
