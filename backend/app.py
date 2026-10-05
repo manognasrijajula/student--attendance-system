@@ -44,34 +44,7 @@ def attendance():
     data = cursor.fetchall()
     cursor.close()
     return jsonify(data)
-@app.route("/mark_attendance", methods=["POST"])
-def mark_attendance():
 
-    data = request.json
-
-    student_id = data["student_id"]
-    attendance_date = data["attendance_date"]
-    status = data["status"]
-
-    cursor = db.cursor()
-
-    sql = """
-    INSERT INTO attendance
-    (student_id, attendance_date, status)
-    VALUES (%s, %s, %s)
-    """
-
-    cursor.execute(
-        sql,
-        (student_id, attendance_date, status)
-    )
-
-    db.commit()
-    cursor.close()
-
-    return jsonify({
-        "message": "Attendance marked successfully!"
-    })
 @app.route("/mark_attendance", methods=["POST"])
 def mark_attendance():
 
