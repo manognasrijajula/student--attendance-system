@@ -22,10 +22,19 @@ def home():
    return send_from_directory(os.path.join(os.path.dirname(__file__), ".."), "dashboard.html")
 @app.route("/students")
 def students():
-    cursor = db.cursor(dictionary=True)
+
+    cursor = db.cursor()
+
     cursor.execute("SELECT * FROM students")
-    data = cursor.fetchall()
+
+    rows = cursor.fetchall()
+
+    columns = [column[0] for column in cursor.description]
+
+    data = [dict(zip(columns, row)) for row in rows]
+
     cursor.close()
+
     return jsonify(data)
 
 @app.route("/attendance")
